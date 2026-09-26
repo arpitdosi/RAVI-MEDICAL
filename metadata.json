@@ -1,0 +1,6 @@
+{
+  "name": "Ravi Medical - Rajasthan Patrika Agency ERP",
+  "description": "Newspaper Agency Billing ERP for Ravi Medical (Rajasthan Patrika) with Excel customer import, day-wise ₹5/day billing, delivery charges, WhatsApp bills, UPI QR, automated reminders, and owner reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

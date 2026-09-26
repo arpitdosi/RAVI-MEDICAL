@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #fafaf9;
+    color: #1c1917;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Print specific styling for single memo & Legal page 4-per-sheet */
+@media print {
+  @page {
+    size: legal portrait;
+    margin: 5mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 11pt;
+  }
+
+  header,
+  footer,
+  nav,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Single Bill Print */
+  #printable-single-bill {
+    width: 105mm !important;
+    max-width: 105mm !important;
+    margin: 0 auto !important;
+    padding: 2mm !important;
+    display: block !important;
+  }
+
+  /* 4 Bills Per Legal Sheet (2x2 Grid) */
+  .legal-page-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: repeat(2, 1fr) !important;
+    gap: 4mm !important;
+    height: 340mm !important;
+    max-height: 340mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    padding: 2mm !important;
+    box-sizing: border-box !important;
+  }
+
+  .legal-page-grid > div {
+    height: 165mm !important;
+    max-height: 165mm !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure colors print crisply */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
