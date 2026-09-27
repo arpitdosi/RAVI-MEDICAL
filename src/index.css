@@ -8,11 +8,11 @@
   }
 }
 
-/* Print specific styling for single memo & Legal page 4-per-sheet */
+/* Print specific styling for single memo & Legal page 4-per-sheet (2-2 Set) */
 @media print {
   @page {
     size: legal portrait;
-    margin: 5mm;
+    margin: 4mm;
   }
 
   html, body {
@@ -20,7 +20,9 @@
     color: #000000 !important;
     padding: 0 !important;
     margin: 0 !important;
-    font-size: 11pt;
+    font-size: 9.5pt;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   header,
@@ -28,6 +30,22 @@
   nav,
   .print\:hidden {
     display: none !important;
+  }
+
+  /* Reset modal fixed positioning & scrolling when printing */
+  .fixed {
+    position: static !important;
+  }
+  .overflow-hidden,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+  .max-h-\[96vh\] {
+    max-height: none !important;
+    height: auto !important;
+  }
+  .shadow-2xl, .shadow-xl {
+    box-shadow: none !important;
   }
 
   /* Single Bill Print */
@@ -39,26 +57,82 @@
     display: block !important;
   }
 
-  /* 4 Bills Per Legal Sheet (2x2 Grid) */
-  .legal-page-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    grid-template-rows: repeat(2, 1fr) !important;
-    gap: 4mm !important;
-    height: 340mm !important;
-    max-height: 340mm !important;
+  /* 4 Bills Per Legal Sheet in 2-2 Sets (2 Top + 2 Bottom) */
+  .legal-sheet-page {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: 206mm !important;
+    min-height: 335mm !important;
+    max-height: 345mm !important;
     page-break-after: always !important;
     break-after: page !important;
-    padding: 2mm !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-sizing: border-box !important;
+    padding: 1.5mm !important;
+    margin: 0 auto !important;
+  }
+
+  .legal-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-height: 155mm !important;
+    max-height: 165mm !important;
+    box-sizing: border-box !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: visible !important;
+  }
+
+  .legal-col {
+    width: 49% !important;
+    max-width: 49% !important;
+    flex: 0 0 49% !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: visible !important;
+  }
+
+  .legal-cut-line {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 5mm !important;
+    font-size: 7.5pt !important;
+    color: #666666 !important;
+    border-top: 1px dashed #777777 !important;
+    margin: 1mm 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Fallback backward compatibility for .legal-page-grid */
+  .legal-page-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 335mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
     box-sizing: border-box !important;
   }
 
   .legal-page-grid > div {
-    height: 165mm !important;
+    width: 49% !important;
+    height: 162mm !important;
     max-height: 165mm !important;
     overflow: hidden !important;
     box-sizing: border-box !important;
     break-inside: avoid !important;
+    margin-bottom: 3mm !important;
   }
 
   /* Ensure colors print crisply */

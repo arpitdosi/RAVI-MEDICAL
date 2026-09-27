@@ -22,8 +22,11 @@ import {
   UploadCloud,
   Download,
   Plus,
+  PlusCircle,
   BookUser,
   Sparkles,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { Customer, MonthBill, AgencySettings } from '../types';
 import {
@@ -32,6 +35,8 @@ import {
   exportToExcel,
   downloadCustomerExcelTemplate,
 } from '../utils/billingUtils';
+import { shareBillOnWhatsApp } from '../utils/shareUtils';
+import { PhysicalBillMemo } from './PhysicalBillMemo';
 
 interface CustomerListProps {
   bills: MonthBill[];
@@ -71,9 +76,42 @@ export const CustomerList: React.FC<CustomerListProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'unpaid' | 'paid' | 'paused'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  // Default to cards on mobile (<768px), table on desktop
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 ? 'cards' : 'table';
+    }
+    return 'cards';
+  });
   const [quickVacationCustomerId, setQuickVacationCustomerId] = useState<string | null>(null);
   const [quickVacationDays, setQuickVacationDays] = useState<number>(0);
+
+  // WhatsApp Smart Share states
+  const [sharingBillId, setSharingBillId] = useState<string | null>(null);
+  const [sharingBill, setSharingBill] = useState<MonthBill | null>(null);
+  const [shareFeedback, setShareFeedback] = useState<string>('');
+
+  const handleShareWhatsApp = async (bill: MonthBill) => {
+    if (sharingBillId) return;
+    setSharingBillId(bill.id);
+    setSharingBill(bill);
+    setShareFeedback('');
+
+    // Wait a brief moment for React to mount the hidden bill memo in the DOM
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    try {
+      const result = await shareBillOnWhatsApp(bill, settings, 'customer-list-share-memo');
+      if (result.message && result.mode !== 'cancelled') {
+        setShareFeedback(`${bill.customerName}: ${result.message}`);
+        setTimeout(() => setShareFeedback(''), 4500);
+      }
+    } catch (err) {
+      console.error('Error sharing bill from customer list:', err);
+    } finally {
+      setSharingBillId(null);
+    }
+  };
 
   // Map customer dictionary for quick lookup
   const customerMap = useMemo(() => {
@@ -244,12 +282,42 @@ export const CustomerList: React.FC<CustomerListProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Hidden off-screen bill memo for capturing authentic bill image on WhatsApp share */}
+      <div
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: 0,
+          width: '420px',
+          background: '#ffffff',
+          zIndex: -999,
+          pointerEvents: 'none',
+        }}
+        aria-hidden="true"
+      >
+        {sharingBill && (
+          <div id="customer-list-share-memo" className="p-2 bg-white">
+            <PhysicalBillMemo bill={sharingBill} settings={settings} />
+          </div>
+        )}
+      </div>
+
+      {/* WhatsApp Share Feedback Notification Toast */}
+      {shareFeedback && (
+        <div className="fixed bottom-4 right-4 z-50 bg-[#002f54] text-white px-4 py-3 rounded-xl shadow-2xl border border-sky-400 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5 duration-200 max-w-md">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-400/30">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          </div>
+          <p className="text-xs sm:text-sm font-semibold leading-snug">{shareFeedback}</p>
+        </div>
+      )}
+
       {/* Top Filter and Search Bar */}
       <div className="bg-white rounded-xl border border-stone-200 p-3 sm:p-4 shadow-2xs space-y-3">
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
             <input
               type="text"
               value={searchTerm}
@@ -257,23 +325,24 @@ export const CustomerList: React.FC<CustomerListProps> = ({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="ग्राहक का नाम, मोबाइल नंबर, कोड (RP-101) या एरिया खोजें..."
-              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none placeholder:text-stone-400"
+              placeholder="ग्राहक नाम, मोबाइल, कोड (RP-101) या एरिया खोजें..."
+              className="w-full pl-9 pr-4 py-2 text-sm sm:text-base border border-stone-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none placeholder:text-stone-400"
             />
           </div>
 
-          {/* Route Filter */}
-          <div className="flex items-center gap-2">
-            <div className="relative">
+          {/* Filters & View Mode */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Route Filter */}
+            <div className="relative flex-1 sm:flex-none">
               <select
                 value={selectedRoute}
                 onChange={(e) => {
                   setSelectedRoute(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-3 pr-8 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-stone-700"
+                className="w-full sm:w-auto pl-3 pr-8 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-stone-700"
               >
-                <option value="all">सभी रूट्स / एरिया (All Routes)</option>
+                <option value="all">सभी रूट्स (All Routes)</option>
                 {routes.map((r) => (
                   <option key={r} value={r}>
                     {r}
@@ -289,7 +358,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({
                 setSelectedStatus(e.target.value as any);
                 setCurrentPage(1);
               }}
-              className="pl-3 pr-8 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-stone-700"
+              className="flex-1 sm:flex-none pl-3 pr-8 py-2 text-xs sm:text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white text-stone-700"
             >
               <option value="all">सभी स्थिति (All)</option>
               <option value="unpaid">केवल बकाया (Pending Dues)</option>
@@ -297,42 +366,31 @@ export const CustomerList: React.FC<CustomerListProps> = ({
               <option value="paused">रोक / छुट्टी (Paused / Leave)</option>
             </select>
 
-            {/* View Mode Toggle (Desktop only) */}
-            <div className="hidden sm:flex items-center bg-stone-100 p-0.5 rounded-lg border border-stone-200">
+            {/* View Mode Toggle (Available for Mobile & Desktop) */}
+            <div className="flex items-center bg-stone-100 p-0.5 rounded-lg border border-stone-200">
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`p-1.5 sm:px-2.5 rounded text-xs transition-colors cursor-pointer flex items-center gap-1 ${
+                  viewMode === 'cards' ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-900'
+                }`}
+                title="मोबाइल कार्ड दृश्य (Mobile Card View)"
+              >
+                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">कार्ड</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded text-xs transition-colors cursor-pointer ${
-                  viewMode === 'table' ? 'bg-white text-stone-900 shadow-2xs font-semibold' : 'text-stone-500 hover:text-stone-900'
+                className={`p-1.5 sm:px-2.5 rounded text-xs transition-colors cursor-pointer flex items-center gap-1 ${
+                  viewMode === 'table' ? 'bg-white text-stone-900 shadow-2xs font-bold' : 'text-stone-500 hover:text-stone-900'
                 }`}
                 title="तालिका दृश्य (Table View)"
               >
                 <LayoutList className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('cards')}
-                className={`p-1.5 rounded text-xs transition-colors cursor-pointer ${
-                  viewMode === 'cards' ? 'bg-white text-stone-900 shadow-2xs font-semibold' : 'text-stone-500 hover:text-stone-900'
-                }`}
-                title="कार्ड दृश्य (Mobile Card View)"
-              >
-                <LayoutGrid className="w-4 h-4" />
+                <span className="hidden sm:inline">तालिका</span>
               </button>
             </div>
-
-            {/* Quick Jama / Udhar Button */}
-            {onOpenTransaction && (
-              <button
-                type="button"
-                onClick={() => onOpenTransaction('', 'jama')}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer border border-emerald-500"
-                title="ग्राहक भुगतान जमा या नया उधार दर्ज करें"
-              >
-                <Receipt className="w-4 h-4 text-emerald-100" />
-                <span>+ जमा / उधार</span>
-              </button>
-            )}
 
             {/* Excel Export Button */}
             <button
@@ -529,16 +587,20 @@ export const CustomerList: React.FC<CustomerListProps> = ({
                         {/* Action Buttons */}
                         <td className="py-2.5 px-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {/* WhatsApp Button */}
-                            <a
-                              href={whatsAppUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors"
-                              title="व्हाट्सएप पर बिल भेजें"
+                            {/* WhatsApp Button with Bill Image */}
+                            <button
+                              type="button"
+                              onClick={() => handleShareWhatsApp(bill)}
+                              disabled={sharingBillId === bill.id}
+                              className="p-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors cursor-pointer disabled:opacity-60"
+                              title="WhatsApp पर बिल पर्ची (फोटो सहित) भेजें"
                             >
-                              <Share2 className="w-3.5 h-3.5" />
-                            </a>
+                              {sharingBillId === bill.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                              ) : (
+                                <Share2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
 
                             {/* View / Print Bill Slip */}
                             <button
@@ -550,25 +612,27 @@ export const CustomerList: React.FC<CustomerListProps> = ({
                               <Printer className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Record Payment */}
+                            {/* Record Payment (पेमेंट लें) */}
                             <button
                               type="button"
                               onClick={() => onRecordPayment(bill)}
-                              className="p-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs transition-colors cursor-pointer"
-                              title="भुगतान प्राप्त दर्ज करें"
+                              className="p-1.5 rounded-md bg-[#00487c] hover:bg-[#003865] text-white shadow-2xs transition-colors cursor-pointer flex items-center gap-1"
+                              title="पेमेंट लें (भुगतान प्राप्त दर्ज करें)"
                             >
                               <CreditCard className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline text-xs font-semibold">पेमेंट लें</span>
                             </button>
 
-                            {/* Khata Entry (Jama / Udhar) */}
+                            {/* Add Udhar (उधार जोड़ें) */}
                             {onOpenTransaction && (
                               <button
                                 type="button"
-                                onClick={() => onOpenTransaction(bill.customerId, 'jama')}
-                                className="p-1.5 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 transition-colors cursor-pointer"
-                                title="खाता एंट्री (रकम जमा या नया उधार दर्ज करें)"
+                                onClick={() => onOpenTransaction(bill.customerId, 'udhar')}
+                                className="p-1.5 rounded-md bg-amber-600 hover:bg-amber-500 text-white shadow-2xs transition-colors cursor-pointer flex items-center gap-1"
+                                title="उधार जोड़ें (नया उधार दर्ज करें)"
                               >
-                                <Receipt className="w-3.5 h-3.5" />
+                                <PlusCircle className="w-3.5 h-3.5" />
+                                <span className="hidden xl:inline text-xs font-semibold">उधार जोड़ें</span>
                               </button>
                             )}
 
@@ -701,59 +765,100 @@ export const CustomerList: React.FC<CustomerListProps> = ({
                   </div>
                 </div>
 
-                {/* Touch Actions */}
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-stone-100">
-                  <a
-                    href={whatsAppUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-semibold"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => onOpenBill(bill)}
-                    className="flex items-center justify-center gap-1 py-1.5 bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-200 rounded-lg text-xs font-semibold cursor-pointer"
-                  >
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>बिल पर्ची</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onRecordPayment(bill)}
-                    className="flex items-center justify-center gap-1 py-1.5 bg-emerald-600 text-white hover:bg-emerald-500 rounded-lg text-xs font-semibold cursor-pointer"
-                  >
-                    <CreditCard className="w-3.5 h-3.5" />
-                    <span>पेमेंट</span>
-                  </button>
-                </div>
-
-                {/* Additional Quick Khata Actions for Mobile */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {onOpenTransaction && (
+                {/* Mobile Optimized Touch Actions */}
+                <div className="space-y-2 pt-2 border-t border-stone-100">
+                  {/* Primary Financial Action Pair: पेमेंट लें & उधार जोड़ें Side-by-Side */}
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => onOpenTransaction(bill.customerId, 'jama')}
-                      className="flex items-center justify-center gap-1.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                      onClick={() => onRecordPayment(bill)}
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-[#00487c] hover:bg-[#003865] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors cursor-pointer active:scale-98"
+                      title="भुगतान प्राप्त दर्ज करें (पेमेंट लें)"
                     >
-                      <Receipt className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>+ जमा / उधार</span>
+                      <CreditCard className="w-4 h-4 text-sky-200 shrink-0" />
+                      <span>पेमेंट लें</span>
                     </button>
-                  )}
-                  {onOpenLedger && cust && (
+
+                    {onOpenTransaction && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenTransaction(bill.customerId, 'udhar')}
+                        className="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-colors cursor-pointer active:scale-98"
+                        title="ग्राहक के खाते में नया उधार जोड़ें"
+                      >
+                        <PlusCircle className="w-4 h-4 text-amber-100 shrink-0" />
+                        <span>उधार जोड़ें</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Primary WhatsApp Action Button with Bill Image */}
+                  <button
+                    type="button"
+                    onClick={() => handleShareWhatsApp(bill)}
+                    disabled={sharingBillId === bill.id}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer disabled:opacity-70 w-full"
+                    title="WhatsApp पर बिल फोटो और विवरण भेजें"
+                  >
+                    {sharingBillId === bill.id ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-emerald-200" />
+                        <span>बिल फोटो तैयार हो रही है...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4 text-emerald-100 shrink-0" />
+                        <span>WhatsApp बिल भेजें (फोटो सहित)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Secondary Mobile Actions 4-Column Grid */}
+                  <div className="grid grid-cols-4 gap-1.5 pt-1">
                     <button
                       type="button"
-                      onClick={() => onOpenLedger(cust, bill)}
-                      className="flex items-center justify-center gap-1.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                      onClick={() => onOpenBill(bill)}
+                      className="flex flex-col items-center justify-center py-2 px-1 bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-200 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer"
+                      title="बिल पर्ची रसीद देखें व प्रिंट करें"
                     >
-                      <History className="w-3.5 h-3.5 text-sky-600" />
-                      <span>खाता पासबुक</span>
+                      <Printer className="w-3.5 h-3.5 text-stone-600 mb-0.5" />
+                      <span>पर्ची</span>
                     </button>
-                  )}
+
+                    <button
+                      type="button"
+                      onClick={() => cust && onOpenLedger?.(cust, bill)}
+                      className="flex flex-col items-center justify-center py-2 px-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer"
+                      title="खाता बही (Ledger / Statement)"
+                    >
+                      <History className="w-3.5 h-3.5 text-amber-700 mb-0.5" />
+                      <span>खाता</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => cust && onEditCustomer(cust)}
+                      className="flex flex-col items-center justify-center py-2 px-1 bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer"
+                      title="ग्राहक विवरण एडिट करें"
+                    >
+                      <Edit className="w-3.5 h-3.5 text-stone-500 mb-0.5" />
+                      <span>एडिट</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`क्या आप ${bill.customerName} को हटाना चाहते हैं?`)) {
+                          onDeleteCustomer(bill.customerId);
+                        }
+                      }}
+                      className="flex flex-col items-center justify-center py-2 px-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer"
+                      title="ग्राहक हटाएं"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-rose-500 mb-0.5" />
+                      <span>हटाएं</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             );

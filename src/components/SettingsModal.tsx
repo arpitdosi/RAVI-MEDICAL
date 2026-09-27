@@ -149,17 +149,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         )}
 
         {/* Settings Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 max-h-[78vh] overflow-y-auto text-sm">
           {/* Bill Top Header Details (Matching Physical Printed Memo) */}
           <div className="space-y-3 p-3.5 bg-sky-50/60 rounded-xl border border-sky-200">
-            <span className="font-bold text-sky-950 block text-xs flex items-center gap-1.5">
+            <span className="font-bold text-sky-950 block text-sm flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-[#00487c]" />
               <span>बिल मेमो शीर्ष शीर्षक (Header Details as in Printed Slip)</span>
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-stone-700 mb-1">
+                <label className="block font-bold text-stone-700 mb-1 text-sm">
                   एजेंट का नाम (Header Name)
                 </label>
                 <input
@@ -168,12 +168,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   value={formData.headerName}
                   onChange={(e) => setFormData({ ...formData, headerName: e.target.value })}
                   placeholder="N. K. SHAH"
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-sm font-bold text-[#00487c] bg-white focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm font-bold text-[#00487c] bg-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-stone-700 mb-1">
+                <label className="block font-bold text-stone-700 mb-1 text-sm">
                   उप-शीर्षक (Sub Header)
                 </label>
                 <input
@@ -182,14 +182,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   value={formData.subHeader}
                   onChange={(e) => setFormData({ ...formData, subHeader: e.target.value })}
                   placeholder="NEWS PAPER AGENT"
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-sm font-semibold bg-white focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm font-semibold bg-white focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-stone-700 mb-1">
+                <label className="block font-bold text-stone-700 mb-1 text-sm">
                   स्थान (Location)
                 </label>
                 <input
@@ -198,12 +198,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="Bagidora, Distt. Banswara (Raj.)"
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-stone-700 mb-1">
+                <label className="block font-bold text-stone-700 mb-1 text-sm">
                   मोबाइल नंबर (Mobiles in Header)
                 </label>
                 <input
@@ -212,33 +212,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   value={formData.mobiles}
                   onChange={(e) => setFormData({ ...formData, mobiles: e.target.value })}
                   placeholder="9413015952 / 9413018226"
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs font-mono font-medium bg-white focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm font-mono font-medium bg-white focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-stone-700 mb-1">
+                <label className="block font-bold text-stone-700 mb-1 text-sm">
                   मंगल पाठ / श्लोक (Top Center)
                 </label>
                 <input
                   type="text"
                   value={formData.shreeInvocation}
                   onChange={(e) => setFormData({ ...formData, shreeInvocation: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none font-medium"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white focus:outline-none font-medium"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-stone-700 mb-1">
+                <label className="block font-bold text-stone-700 mb-1 text-sm">
                   शुरुआती बिल संख्या (Start Bill No.)
                 </label>
                 <input
                   type="number"
                   value={formData.startBillNo}
                   onChange={(e) => setFormData({ ...formData, startBillNo: Number(e.target.value) })}
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs font-mono font-bold bg-white focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm font-mono font-bold bg-white focus:outline-none"
                 />
               </div>
             </div>
@@ -246,78 +246,78 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Bank Account Details */}
           <div className="space-y-3 p-3.5 bg-stone-50 rounded-xl border border-stone-200">
-            <span className="font-bold text-stone-800 block text-xs flex items-center gap-1.5">
+            <span className="font-bold text-stone-800 block text-sm flex items-center gap-1.5">
               <Building2 className="w-4 h-4 text-emerald-700" />
               <span>बैंक खाता विवरण (Bank Details Printed on Bill)</span>
             </span>
 
             <div>
-              <label className="block font-medium text-stone-700 mb-1">बैंक का नाम (Bank Name & Branch)</label>
+              <label className="block font-bold text-stone-700 mb-1 text-sm">बैंक का नाम (Bank Name & Branch)</label>
               <input
                 type="text"
                 value={formData.bankName}
                 onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white focus:outline-none font-medium"
+                className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white focus:outline-none font-medium"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block font-medium text-stone-700 mb-1">IFSC कोड</label>
+                <label className="block font-bold text-stone-700 mb-1 text-sm">IFSC कोड</label>
                 <input
                   type="text"
                   value={formData.bankIfsc}
                   onChange={(e) => setFormData({ ...formData, bankIfsc: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white font-mono font-bold uppercase focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white font-mono font-bold uppercase focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block font-medium text-stone-700 mb-1">खाता संख्या (A/C No.)</label>
+                <label className="block font-bold text-stone-700 mb-1 text-sm">खाता संख्या (A/C No.)</label>
                 <input
                   type="text"
                   value={formData.bankAccountNo}
                   onChange={(e) => setFormData({ ...formData, bankAccountNo: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white font-mono font-bold focus:outline-none"
+                  className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white font-mono font-bold focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* UPI ID & Daily Rates */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-stone-50 rounded-xl border border-stone-200">
             <div>
-              <label className="block font-medium text-stone-700 mb-1">दैनिक दर (₹/दिन)</label>
+              <label className="block font-bold text-stone-700 mb-1 text-sm">दैनिक दर (₹/दिन)</label>
               <input
                 type="number"
                 step="0.5"
                 value={formData.defaultDailyRate}
                 onChange={(e) => setFormData({ ...formData, defaultDailyRate: Number(e.target.value) })}
-                className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white font-bold"
+                className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white font-bold"
               />
-              <span className="text-[10px] text-stone-500">₹5.00 प्रति दिन</span>
+              <span className="text-xs text-stone-500 mt-0.5 block">₹5.00 प्रति दिन</span>
             </div>
 
             <div>
-              <label className="block font-medium text-stone-700 mb-1">D.C. (डिलीवरी चार्ज ₹)</label>
+              <label className="block font-bold text-stone-700 mb-1 text-sm">D.C. (डिलीवरी चार्ज ₹)</label>
               <input
                 type="number"
                 step="1"
                 value={formData.defaultDeliveryCharge}
                 onChange={(e) => setFormData({ ...formData, defaultDeliveryCharge: Number(e.target.value) })}
-                className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white font-bold"
+                className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white font-bold"
               />
-              <span className="text-[10px] text-stone-500">मासिक ₹5</span>
+              <span className="text-xs text-stone-500 mt-0.5 block">मासिक ₹5</span>
             </div>
 
             <div>
-              <label className="block font-medium text-stone-700 mb-1">UPI ID (QR पेमेंट)</label>
+              <label className="block font-bold text-stone-700 mb-1 text-sm">UPI ID (QR पेमेंट)</label>
               <input
                 type="text"
                 value={formData.upiId}
                 onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
-                className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs bg-white font-mono text-rose-700 font-bold"
+                className="w-full px-3.5 py-2 border border-stone-300 rounded-xl text-base sm:text-sm bg-white font-mono text-rose-700 font-bold"
               />
-              <span className="text-[10px] text-stone-500">PhonePe / GPay QR</span>
+              <span className="text-xs text-stone-500 mt-0.5 block">PhonePe / GPay QR</span>
             </div>
           </div>
 

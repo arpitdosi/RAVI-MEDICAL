@@ -10,6 +10,10 @@ import {
   Eye,
   FileText,
   Receipt,
+  PlusCircle,
+  FileDown,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react';
 import { MonthBill, AgencySettings } from '../types';
 import {
@@ -17,6 +21,8 @@ import {
   createWhatsAppUrl,
   buildUpiUri,
 } from '../utils/billingUtils';
+import { generateSingleBillPdf } from '../utils/pdfUtils';
+import { shareBillOnWhatsApp } from '../utils/shareUtils';
 import { PhysicalBillMemo } from './PhysicalBillMemo';
 import { QRCodeView } from './QRCodeView';
 
@@ -39,6 +45,9 @@ export const BillModal: React.FC<BillModalProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [showQrBox, setShowQrBox] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isSharingWhatsApp, setIsSharingWhatsApp] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState('');
 
   if (!isOpen || !bill) return null;
 
@@ -58,8 +67,46 @@ export const BillModal: React.FC<BillModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadPdf = async () => {
+    if (isGeneratingPdf || !bill) return;
+    setIsGeneratingPdf(true);
+    try {
+      await generateSingleBillPdf(
+        'printable-single-bill',
+        `Patrika_Bill_${bill.billNo}_${bill.customerName.replace(/\s+/g, '_')}`
+      );
+    } catch (err) {
+      console.error('Failed to download single bill PDF:', err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleShareWhatsAppWithImage = async () => {
+    if (isSharingWhatsApp || !bill) return;
+    setIsSharingWhatsApp(true);
+    setShareFeedback('');
+
+    try {
+      const result = await shareBillOnWhatsApp(bill, settings, 'printable-single-bill');
+      if (result.message && result.mode !== 'cancelled') {
+        setShareFeedback(result.message);
+        setTimeout(() => setShareFeedback(''), 4500);
+      }
+    } catch (err) {
+      console.error('Error sharing bill on WhatsApp:', err);
+    } finally {
+      setIsSharingWhatsApp(false);
+    }
+  };
+
   const handlePrint = () => {
-    window.print();
+    try {
+      window.print();
+    } catch (e) {
+      console.warn('window.print blocked or failed, downloading PDF instead', e);
+      handleDownloadPdf();
+    }
   };
 
   return (
@@ -83,6 +130,14 @@ export const BillModal: React.FC<BillModalProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Feedback Alert Banner */}
+        {shareFeedback && (
+          <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-in fade-in duration-200 shrink-0">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{shareFeedback}</span>
+          </div>
+        )}
 
         {/* Printable Area */}
         <div className="p-4 sm:p-5 overflow-y-auto bg-stone-100 flex flex-col items-center justify-center">
@@ -114,72 +169,100 @@ export const BillModal: React.FC<BillModalProps> = ({
         </div>
 
         {/* Bottom Actions Bar (Non-print) */}
-        <div className="bg-white px-4 py-3 border-t border-stone-200 flex flex-wrap items-center justify-between gap-2 print:hidden shrink-0">
-          <div className="flex items-center gap-1.5">
+        <div className="bg-white px-4 py-3 border-t border-stone-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 print:hidden shrink-0">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-lg text-xs font-bold transition-colors cursor-pointer border border-stone-300"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs sm:text-sm font-bold transition-colors cursor-pointer border border-stone-300"
               title="सिंगल बिल प्रिंट निकालें"
             >
               <Printer className="w-4 h-4 text-stone-700" />
-              <span>प्रिंट करें</span>
+              <span>प्रिंट</span>
+            </button>
+
+            {/* Direct Single Bill PDF Download */}
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isGeneratingPdf}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs sm:text-sm font-bold transition-colors cursor-pointer border border-emerald-300 disabled:opacity-50"
+              title="बिल की PDF फाइल डाउनलोड करें"
+            >
+              {isGeneratingPdf ? (
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+              ) : (
+                <FileDown className="w-4 h-4 text-emerald-600" />
+              )}
+              <span>PDF</span>
             </button>
 
             <button
               type="button"
               onClick={() => setShowQrBox(!showQrBox)}
-              className="inline-flex items-center gap-1 px-2.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium transition-colors cursor-pointer border border-stone-300"
+              className="inline-flex items-center justify-center gap-1 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer border border-stone-300"
               title="QR कोड दिखाएं"
             >
               <QrCode className="w-4 h-4 text-[#00487c]" />
-              <span className="hidden sm:inline">QR</span>
+              <span>QR कोड</span>
             </button>
 
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1 px-2.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-medium transition-colors cursor-pointer border border-stone-300"
+              className="inline-flex items-center justify-center gap-1 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer border border-stone-300"
             >
               {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-stone-600" />}
-              <span className="hidden sm:inline">{copied ? 'कॉपी हो गया' : 'टेक्स्ट'}</span>
+              <span>{copied ? 'कॉपी' : 'टेक्स्ट'}</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onRecordPayment(bill)}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#00487c] hover:bg-[#003865] text-white rounded-xl text-xs sm:text-sm font-bold shadow-2xs transition-colors cursor-pointer"
+              title="पेमेंट दर्ज करें"
+            >
+              <CreditCard className="w-4 h-4 text-sky-200" />
+              <span>पेमेंट लें</span>
+            </button>
+
             {onOpenTransaction && (
               <button
                 type="button"
                 onClick={() => {
                   onClose();
-                  onOpenTransaction(bill.customerId, 'jama');
+                  onOpenTransaction(bill.customerId, 'udhar');
                 }}
-                className="inline-flex items-center gap-1 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold border border-emerald-300 transition-colors cursor-pointer"
-                title="रकम जमा या नया उधार दर्ज करें"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-2xs transition-colors cursor-pointer"
+                title="ग्राहक के खाते में नया उधार जोड़ें"
               >
-                <Receipt className="w-4 h-4 text-emerald-600" />
-                <span>+ जमा / नया उधार</span>
+                <PlusCircle className="w-4 h-4 text-amber-100" />
+                <span>+ उधार जोड़ें</span>
               </button>
             )}
 
+            {/* Smart WhatsApp Share Button with Image */}
             <button
               type="button"
-              onClick={() => onRecordPayment(bill)}
-              className="inline-flex items-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              onClick={handleShareWhatsAppWithImage}
+              disabled={isSharingWhatsApp}
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-2xs transition-colors cursor-pointer disabled:opacity-60"
+              title="बिल की फोटो और विवरण WhatsApp पर भेजें"
             >
-              <CreditCard className="w-4 h-4" />
-              <span>पेमेंट दर्ज करें</span>
+              {isSharingWhatsApp ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-200" />
+                  <span>तैयार हो रहा है...</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 text-emerald-100" />
+                  <span>WhatsApp (बिल फोटो सहित)</span>
+                </>
+              )}
             </button>
-
-            <a
-              href={whatsAppUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold shadow-2xs transition-colors"
-            >
-              <Share2 className="w-4 h-4" />
-              <span>WhatsApp</span>
-            </a>
           </div>
         </div>
       </div>

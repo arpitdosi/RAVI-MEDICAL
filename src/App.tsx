@@ -230,7 +230,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 flex flex-col font-sans antialiased text-stone-900">
+    <div className="min-h-screen bg-stone-100 flex flex-col font-sans antialiased text-stone-900 overflow-x-hidden w-full max-w-full">
       {/* Header Bar */}
       <Header
         settings={settings}

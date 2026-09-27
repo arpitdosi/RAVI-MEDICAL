@@ -120,66 +120,103 @@ export const PhysicalBillMemo: React.FC<PhysicalBillMemoProps> = ({
             </table>
           </div>
 
-          {/* Middle Details Split: Left (Bank & Terms) | Right (D.C., Old Due, Total) */}
-          <div className="grid grid-cols-12 gap-1.5 mt-1.5 text-[10px] leading-tight">
+          {/* Middle Details Split: Left (Bank & Terms) | Right (D.C., Old Due, Total, Net Due) */}
+          <div className="grid grid-cols-2 gap-2 mt-1.5 text-[10px] leading-tight">
             {/* Left Bank Details & Terms */}
-            <div className="col-span-7 flex flex-col justify-between border-r border-[#00487c]/30 pr-1">
+            <div className="flex flex-col justify-between border-r border-[#00487c]/30 pr-1.5">
               {/* Bank Account */}
-              <div className="bg-sky-50/40 p-1 rounded border border-[#00487c]/30 text-[9.5px]">
-                <div className="font-bold">{settings.bankName}</div>
-                <div className="font-mono font-semibold">{settings.bankIfsc}</div>
-                <div className="font-mono font-bold text-stone-900">{settings.bankAccountNo}</div>
+              <div className="bg-sky-50/50 p-1.5 rounded-md border border-[#00487c]/30 text-[9.5px]">
+                <div className="font-bold text-[#00487c] truncate">{settings.bankName}</div>
+                <div className="font-mono font-semibold text-stone-700">IFSC: {settings.bankIfsc}</div>
+                <div className="font-mono font-bold text-stone-900">A/c: {settings.bankAccountNo}</div>
               </div>
 
               {/* Terms Bullets */}
-              <div className="space-y-0.5 mt-1 text-[9px] text-stone-700">
+              <div className="space-y-0.5 mt-1 text-[8.5px] sm:text-[9px] text-stone-700">
                 <p>• {settings.term1}</p>
                 <p>• {settings.term2}</p>
                 <p>• {settings.term3}</p>
               </div>
+
+              {/* Signature Line */}
+              {showSignature && (
+                <div className="mt-1.5 pt-1 border-t border-[#00487c]/30 text-left">
+                  <span className="text-[9px] font-serif italic font-bold text-[#00487c]">
+                    हस्ताक्षर (Signature)
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Right Calculations Box */}
-            <div className="col-span-5 flex flex-col justify-between">
-              <div className="border border-[#00487c] rounded-md overflow-hidden bg-white">
-                <table className="w-full text-[11px] border-collapse">
+            <div className="flex flex-col justify-between">
+              <div className="border border-[#00487c] rounded-md overflow-hidden bg-white shadow-2xs">
+                <table className="w-full text-[10px] sm:text-[10.5px] border-collapse">
                   <tbody>
                     <tr className="border-b border-[#00487c]">
-                      <td className="py-0.5 px-1.5 bg-sky-50 font-black border-r border-[#00487c] text-left">
-                        D.C.
+                      <td className="py-0.5 px-1.5 bg-sky-50 font-bold border-r border-[#00487c] text-left text-stone-700">
+                        D.C. (वितरण शुल्क)
                       </td>
                       <td className="py-0.5 px-1.5 text-right font-mono font-bold">
-                        {bill.deliveryCharge}
+                        ₹{bill.deliveryCharge}
                       </td>
                     </tr>
                     <tr className="border-b border-[#00487c]">
-                      <td className="py-0.5 px-1.5 bg-sky-50 font-black border-r border-[#00487c] text-left">
-                        Old Due
+                      <td className="py-0.5 px-1.5 bg-sky-50 font-bold border-r border-[#00487c] text-left text-stone-700">
+                        Old Due (पिछला बकाया)
                       </td>
                       <td className="py-0.5 px-1.5 text-right font-mono font-bold text-rose-700">
-                        {bill.oldDue}
+                        ₹{bill.oldDue}
                       </td>
                     </tr>
-                    <tr className="bg-sky-100/70 font-black text-xs">
-                      <td className="py-1 px-1.5 border-r border-[#00487c] text-left uppercase text-[#00487c]">
-                        TOTAL
+                    <tr className="border-b border-[#00487c] bg-stone-50">
+                      <td className="py-0.5 px-1.5 font-bold border-r border-[#00487c] text-left text-stone-700">
+                        कुल बिल (Total)
                       </td>
-                      <td className="py-1 px-1.5 text-right font-mono font-black text-sm text-stone-900">
-                        {bill.totalPayable}
+                      <td className="py-0.5 px-1.5 text-right font-mono font-bold text-stone-900">
+                        ₹{bill.totalPayable}
+                      </td>
+                    </tr>
+                    {bill.paidAmount > 0 && (
+                      <tr className="border-b border-[#00487c] bg-emerald-50">
+                        <td className="py-0.5 px-1.5 font-bold border-r border-[#00487c] text-left text-emerald-800">
+                          जमा राशि (Paid -)
+                        </td>
+                        <td className="py-0.5 px-1.5 text-right font-mono font-bold text-emerald-700">
+                          -₹{bill.paidAmount}
+                        </td>
+                      </tr>
+                    )}
+                    <tr className="bg-sky-100 font-black text-[10.5px] sm:text-[11px] text-[#00487c]">
+                      <td className="py-1 px-1.5 border-r border-[#00487c] text-left uppercase">
+                        देय राशि (Due)
+                      </td>
+                      <td className="py-1 px-1.5 text-right font-mono font-black text-rose-700 text-xs sm:text-sm">
+                        ₹{bill.remainingDue}
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
 
-              {/* Signature Line */}
-              {showSignature && (
-                <div className="text-right mt-1 pt-3 pr-1">
-                  <div className="inline-block border-t border-[#00487c] text-[10px] font-serif italic text-right px-2 font-bold text-[#00487c]">
-                    Signature
-                  </div>
-                </div>
-              )}
+          {/* HIGH-VISIBILITY PROMINENT AMOUNT TO COLLECT BANNER (ग्राहक से लेने योग्य राशि) */}
+          <div className="mt-2 py-1.5 px-2.5 bg-[#00487c] text-white rounded-lg flex items-center justify-between border-2 border-[#00487c] shadow-xs">
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] sm:text-[11px] font-black tracking-wide uppercase text-sky-200">
+                ग्राहक से कुल देय राशि (Amount To Collect)
+              </span>
+              <span className="text-[8.5px] sm:text-[9px] text-sky-100/90 font-mono">
+                {bill.paidAmount > 0
+                  ? `(कुल बिल ₹${bill.totalPayable} - जमा ₹${bill.paidAmount} = बकाया)`
+                  : `(अखबार: ₹${bill.dailyPaperAmount.toFixed(0)} + D.C.: ₹${bill.deliveryCharge} + पिछला: ₹${bill.oldDue})`}
+              </span>
+            </div>
+            <div className="text-right shrink-0 pl-2">
+              <span className="font-mono text-base sm:text-xl font-black text-amber-300 drop-shadow-xs">
+                ₹{bill.remainingDue}
+              </span>
             </div>
           </div>
         </div>

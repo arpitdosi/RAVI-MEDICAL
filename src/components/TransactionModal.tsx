@@ -207,12 +207,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-stone-200 overflow-hidden transform transition-all flex flex-col max-h-[95vh]">
         {/* Header */}
         <div
-          className={`px-5 py-4 flex items-center justify-between text-white shrink-0 ${
+          className={`px-5 sm:px-6 py-4 flex items-center justify-between text-white shrink-0 ${
             type === 'jama' ? 'bg-emerald-700' : 'bg-rose-700'
           }`}
         >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
               {type === 'jama' ? (
                 <ArrowDownLeft className="w-5 h-5 text-emerald-100" />
               ) : (
@@ -220,10 +220,10 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               )}
             </div>
             <div>
-              <h3 className="font-bold text-sm leading-tight">
+              <h3 className="font-bold text-base sm:text-lg leading-tight">
                 {type === 'jama' ? 'रकम जमा एंट्री (Payment Received / Jama)' : 'नया उधार एंट्री (New Credit / Udhar Out)'}
               </h3>
-              <p className="text-xs text-white/80">
+              <p className="text-xs sm:text-sm text-white/80">
                 रवि मेडिकल एवं राजस्थान पत्रिका दैनिक खाता बही
               </p>
             </div>
@@ -231,7 +231,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="text-white/80 hover:text-white rounded-lg p-1 transition-colors cursor-pointer"
+            className="text-white/80 hover:text-white rounded-lg p-1.5 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -239,20 +239,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
         {/* Content */}
         {!completedTx ? (
-          <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto">
             {error && (
-              <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg flex items-center gap-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {/* Transaction Type Segmented Toggle */}
-            <div className="grid grid-cols-2 gap-2 p-1 bg-stone-100 rounded-xl border border-stone-200">
+            <div className="grid grid-cols-2 gap-2 p-1.5 bg-stone-100 rounded-xl border border-stone-200">
               <button
                 type="button"
                 onClick={() => setType('jama')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   type === 'jama'
                     ? 'bg-emerald-600 text-white shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
@@ -265,7 +265,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               <button
                 type="button"
                 onClick={() => setType('udhar')}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   type === 'udhar'
                     ? 'bg-rose-600 text-white shadow-xs'
                     : 'text-stone-600 hover:text-stone-900'
@@ -282,26 +282,26 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               bills={bills}
               selectedCustomerId={selectedCustomerId}
               onSelectCustomer={(custId) => setSelectedCustomerId(custId)}
-              label="ग्राहक चुनें (Customer Selector - ड्रैग व ड्रॉप सूची)"
+              label="ग्राहक चुनें (Customer Selector)"
               accentColor={type === 'jama' ? 'emerald' : 'rose'}
               initiallyOpen={!preSelectedCustomerId}
             />
 
             {/* Current Balance & Live Projected Balance Card */}
             {selectedCustomer && (
-              <div className="bg-stone-50 border border-stone-200 rounded-xl p-3 grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="bg-stone-50 border border-stone-200 rounded-xl p-3.5 grid grid-cols-3 gap-2 text-center text-xs sm:text-sm">
                 <div>
-                  <span className="text-stone-500 text-[10px] block">पिछला बकाया</span>
-                  <span className="font-mono font-bold text-sm text-stone-800">
+                  <span className="text-stone-500 text-xs block">पिछला बकाया</span>
+                  <span className="font-mono font-bold text-sm sm:text-base text-stone-800">
                     ₹{currentBalance}
                   </span>
                 </div>
                 <div className="border-x border-stone-200">
-                  <span className="text-stone-500 text-[10px] block">
+                  <span className="text-stone-500 text-xs block">
                     {type === 'jama' ? 'जमा राशि' : 'नया उधार'}
                   </span>
                   <span
-                    className={`font-mono font-black text-sm ${
+                    className={`font-mono font-black text-sm sm:text-base ${
                       type === 'jama' ? 'text-emerald-700' : 'text-rose-600'
                     }`}
                   >
@@ -309,9 +309,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   </span>
                 </div>
                 <div>
-                  <span className="text-stone-500 text-[10px] block">अपडेटेड शेष</span>
+                  <span className="text-stone-500 text-xs block">अपडेटेड शेष</span>
                   <span
-                    className={`font-mono font-black text-base ${
+                    className={`font-mono font-black text-base sm:text-lg ${
                       projectedBalance > 0 ? 'text-rose-700' : 'text-emerald-700'
                     }`}
                   >
@@ -323,11 +323,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
             {/* Amount Field */}
             <div>
-              <label className="block text-xs font-bold text-stone-800 mb-1">
+              <label className="block text-sm font-bold text-stone-800 mb-1.5">
                 {type === 'jama' ? 'जमा प्राप्त राशि (Received Amount ₹) *' : 'नया उधार राशि (New Credit Amount ₹) *'}
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-stone-400 font-bold text-base">₹</span>
+                <span className="absolute left-3.5 top-3 text-stone-400 font-bold text-xl">₹</span>
                 <input
                   type="number"
                   required
@@ -336,7 +336,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   value={amount}
                   onChange={(e) => setAmount(e.target.value === '' ? '' : Number(e.target.value))}
                   placeholder="0"
-                  className={`w-full pl-8 pr-3 py-2 text-xl font-mono font-black border rounded-lg focus:outline-none ${
+                  className={`w-full pl-9 pr-4 py-2.5 text-2xl sm:text-3xl font-mono font-black border-2 rounded-xl focus:outline-none ${
                     type === 'jama'
                       ? 'border-emerald-300 text-emerald-900 focus:ring-2 focus:ring-emerald-500'
                       : 'border-rose-300 text-rose-900 focus:ring-2 focus:ring-rose-500'
@@ -345,12 +345,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
               </div>
 
               {/* Quick Amount Suggestion Chips */}
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {currentBalance > 0 && (
                   <button
                     type="button"
                     onClick={() => setAmount(currentBalance)}
-                    className="text-[11px] px-2 py-0.5 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded border border-stone-300 cursor-pointer font-medium"
+                    className="text-xs sm:text-sm px-3 py-1 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-lg border border-stone-300 cursor-pointer font-bold"
                   >
                     पूरा बकाया (₹{currentBalance})
                   </button>
@@ -360,7 +360,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     key={val}
                     type="button"
                     onClick={() => setAmount(val)}
-                    className="text-[11px] px-2 py-0.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded border border-stone-200 cursor-pointer font-mono"
+                    className="text-xs sm:text-sm px-3 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg border border-stone-200 cursor-pointer font-mono font-semibold"
                   >
                     ₹{val}
                   </button>
@@ -370,7 +370,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
             {/* Reason / Category */}
             <div>
-              <label className="block text-xs font-semibold text-stone-700 mb-1">
+              <label className="block text-sm font-bold text-stone-800 mb-1.5">
                 {type === 'jama' ? 'जमा का विवरण (Payment For)' : 'उधार का मद / सामान (Item / Credit Reason)'}
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -392,7 +392,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     key={r}
                     type="button"
                     onClick={() => setReason(r)}
-                    className={`py-1.5 px-2 text-[11px] rounded-lg border text-left transition-colors cursor-pointer ${
+                    className={`py-2 px-2.5 text-xs sm:text-sm rounded-xl border text-left transition-colors cursor-pointer ${
                       reason === r
                         ? type === 'jama'
                           ? 'bg-emerald-50 text-emerald-800 border-emerald-400 font-bold'
@@ -409,7 +409,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             {/* Payment Mode (Only for Jama) */}
             {type === 'jama' && (
               <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                <label className="block text-sm font-bold text-stone-800 mb-1.5">
                   भुगतान का माध्यम (Payment Mode)
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -425,9 +425,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                       key={m.id}
                       type="button"
                       onClick={() => setMode(m.id as any)}
-                      className={`py-1.5 px-2 text-xs font-medium rounded-lg border text-center transition-colors cursor-pointer ${
+                      className={`py-2 px-2 text-xs sm:text-sm font-bold rounded-xl border text-center transition-colors cursor-pointer ${
                         mode === m.id
-                          ? 'bg-emerald-600 text-white border-emerald-700 font-bold'
+                          ? 'bg-emerald-600 text-white border-emerald-700'
                           : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
                       }`}
                     >
@@ -439,20 +439,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             )}
 
             {/* Date, Time & Reference */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-stone-700 mb-1">तारीख</label>
+                <label className="block text-sm font-bold text-stone-800 mb-1.5">तारीख</label>
                 <input
                   type="date"
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-2.5 py-1.5 text-xs border border-stone-300 rounded-lg focus:outline-none"
+                  className="w-full px-3.5 py-2.5 text-base sm:text-sm border border-stone-300 rounded-xl focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-bold text-stone-800 mb-1.5">
                   {type === 'jama' ? 'रेफरेंस / UTR नं (Optional)' : 'बिल / पर्ची नं (Optional)'}
                 </label>
                 <input
@@ -460,14 +460,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   value={referenceNo}
                   onChange={(e) => setReferenceNo(e.target.value)}
                   placeholder="उदा. UPI/491024..."
-                  className="w-full px-2.5 py-1.5 text-xs border border-stone-300 rounded-lg focus:outline-none font-mono"
+                  className="w-full px-3.5 py-2.5 text-base sm:text-sm border border-stone-300 rounded-xl focus:outline-none font-mono"
                 />
               </div>
             </div>
 
             {/* Remarks / Item Notes */}
             <div>
-              <label className="block text-xs font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-bold text-stone-800 mb-1.5">
                 विशिष्ट टिप्पणी / विवरण (Item Details / Notes)
               </label>
               <input
@@ -475,22 +475,22 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="उदा. बीपी गोली 2 पत्ता, या काउंटर पर प्राप्त..."
-                className="w-full px-2.5 py-1.5 text-xs border border-stone-300 rounded-lg focus:outline-none"
+                className="w-full px-3.5 py-2.5 text-base sm:text-sm border border-stone-300 rounded-xl focus:outline-none"
               />
             </div>
 
             {/* Submit Action Buttons */}
-            <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-stone-200 flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-xs text-stone-600 hover:text-stone-800 border border-stone-300 rounded-lg cursor-pointer"
+                className="px-4 py-2.5 text-sm sm:text-base font-semibold text-stone-600 hover:text-stone-800 border border-stone-300 rounded-xl cursor-pointer"
               >
                 रद्द करें
               </button>
               <button
                 type="submit"
-                className={`inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white rounded-lg shadow-sm transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-6 py-2.5 text-sm sm:text-base font-bold text-white rounded-xl shadow-xs transition-all cursor-pointer ${
                   type === 'jama'
                     ? 'bg-emerald-700 hover:bg-emerald-600'
                     : 'bg-rose-700 hover:bg-rose-600'
