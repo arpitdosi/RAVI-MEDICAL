@@ -73,25 +73,27 @@ export const CustomerLedgerModal: React.FC<CustomerLedgerModalProps> = ({
     }
   };
 
-  // Generate complete statement text for WhatsApp
+  // Generate concise statement text for WhatsApp
   const generateStatementText = () => {
-    let msg = `╔════════════════════════════════════╗\n  📰 *${settings.headerName}*\n   *${settings.subHeader}*\n   ${settings.location} • M. ${settings.mobiles}\n╚════════════════════════════════════╝\n📜 *ग्राहक खाता विवरण (ACCOUNT STATEMENT)*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 ग्राहक (Customer): *${customer.name}* (कोड: *#${customer.customerCode}*)\n🏠 रूट (Route): *${customer.route}*\n📞 फोन: ${customer.phone}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    let msg = `📜 *${settings.headerName} - खाता विवरण*
+👤 ग्राहक: *${customer.name}* (${customer.route})
+━━━━━━━━━━━━━━━━━━━━\n`;
 
     if (bill) {
-      msg += `🧾 *चालू माह बिल पर्ची (#${bill.billNo} - ${bill.monthFormatted}):*\n• दैनिक पेपर (${bill.billedDays} दिन @ ₹${bill.ratePerDay}): *₹${bill.dailyPaperAmount}*\n• D.C. वितरण प्रभार: *₹${bill.deliveryCharge}*\n• पिछला बकाया (Old Due): *₹${bill.oldDue}*\n• कुल बिल: *₹${bill.totalPayable}*\n${bill.paidAmount > 0 ? `• जमा राशि: *₹${bill.paidAmount}*\n` : ''}👉 *चालू बिल देय शेष: ₹${bill.remainingDue}*\n\n`;
+      msg += `🧾 *चालू माह बिल (${bill.monthFormatted}):*
+• पेपर (${bill.billedDays} दिन): *₹${bill.dailyPaperAmount}*
+• D.C. वितरण चार्ज: *₹${bill.deliveryCharge}*
+• पुराना बकाया (Old Due): *₹${bill.oldDue}*
+• कुल बिल: *₹${bill.totalPayable}*
+${bill.paidAmount > 0 ? `• जमा: *₹${bill.paidAmount}*\n` : ''}━━━━━━━━━━━━━━━━━━━━\n`;
     }
 
-    msg += `📋 *हाल के लेन-देन (Recent Ledger Entries):*\n`;
-    if (customerTxs.length === 0) {
-      msg += `• कोई अतिरिक्त लेन-देन प्रविष्टि नहीं।\n`;
-    } else {
-      customerTxs.slice(0, 5).forEach((t) => {
-        const sign = t.type === 'jama' ? '✅ जमा (-)' : '🔴 उधार (+)';
-        msg += `• ${t.date}: ${sign} ₹${t.amount} ${t.reason ? `(${t.reason})` : ''}\n`;
-      });
-    }
+    msg += `👉 *कुल बकाया (Outstanding): ₹${currentDue}*
+━━━━━━━━━━━━━━━━━━━━
+📲 *UPI ID:* ${settings.upiId}
+🔗 पे लिंक: upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent(settings.headerName)}&am=${currentDue}&cu=INR
 
-    msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔥 *ग्राहक से कुल प्राप्त देय राशि:*\n👉 *वर्तमान कुल शेष बकाया: ₹${currentDue}*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🏦 *बैंक खाता:* ${settings.bankName} | A/C: ${settings.bankAccountNo} | IFSC: ${settings.bankIfsc}\n📲 *UPI ID:* *${settings.upiId}*\n• डायरेक्ट पे लिंक: upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent(settings.headerName)}&am=${currentDue}&cu=INR\n\nसम्पर्क: ${settings.mobiles}\n${settings.medicalStoreName}`;
+(कृपया समय पर भुगतान कर सहयोग करें। धन्यवाद!)`;
     return msg;
   };
 

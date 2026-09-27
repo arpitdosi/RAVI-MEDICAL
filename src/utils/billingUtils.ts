@@ -142,7 +142,7 @@ export function buildUpiUri(
 }
 
 /**
- * Generates formatted WhatsApp bill message with exact physical bill breakdown
+ * Generates formatted, concise WhatsApp bill message with only essential bill details
  */
 export function generateWhatsAppBillText(
   bill: MonthBill,
@@ -150,46 +150,21 @@ export function generateWhatsAppBillText(
 ): string {
   const upiLink = `upi://pay?pa=${encodeURIComponent(settings.upiId)}&pn=${encodeURIComponent(settings.headerName)}&am=${bill.remainingDue}&tn=${encodeURIComponent(`Patrika Bill ${bill.billNo}`)}&cu=INR`;
 
-  return `╔════════════════════════════════════╗
-  📰 *${settings.headerName}*
-   *${settings.subHeader}*
-   ${settings.location} • M. ${settings.mobiles}
-╚════════════════════════════════════╝
-🧾 *क्रेडिट मेमो बिल पर्ची (CREDIT MEMO)*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 *बिल नं. (Bill No.):* #${bill.billNo}
-📅 *दिनांक (Date):* ${bill.billDateFormatted}
-🗓️ *बिल माह (Month):* ${bill.monthName} (${bill.monthFormatted})
-👤 *श्रीमान (Customer):* *${bill.customerName}* ${bill.customerCode ? `(#${bill.customerCode})` : ''}
-📍 *रूट (Route):* ${bill.route}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 *मासिक हिसाब विवरण (BILL BREAKDOWN):*
-🗞️ *${settings.paperName}:* ${bill.billedDays} दिन @ ₹${bill.ratePerDay.toFixed(2)} = *₹${bill.dailyPaperAmount.toFixed(2)}*
-${bill.pauseDays > 0 ? `   (छुट्टी/Pause: ${bill.pauseDays} दिन की कटौती की गई)\n` : ''}🚚 *D.C. (वितरण प्रभार):* *₹${bill.deliveryCharge}*
-⏮️ *Old Due (पिछला बकाया):* *₹${bill.oldDue}*
-─────────────────────────────────────
-💵 *कुल बिल (Total Payable): ₹${bill.totalPayable}*
-${bill.paidAmount > 0 ? `✅ जमा राशि (Paid): ₹${bill.paidAmount}\n` : ''}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔥 *ग्राहक से प्राप्त देय राशि:*
-👉 *अंतिम देय (AMOUNT TO COLLECT): ₹${bill.remainingDue}*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏦 *बैंक खाता विवरण (Bank Details):*
-• बैंक: *${settings.bankName}*
-• खाता संख्या: *${settings.bankAccountNo}*
-• IFSC: *${settings.bankIfsc}*
+  return `📰 *${settings.headerName} - अखबार बिल*
+👤 ग्राहक: *${bill.customerName}*
+🗓️ बिल माह: *${bill.monthFormatted}* (बिल नं: #${bill.billNo})
+━━━━━━━━━━━━━━━━━━━━
+• दैनिक पेपर (${bill.billedDays} दिन): *₹${bill.dailyPaperAmount}*
+• वितरण प्रभार (D.C.): *₹${bill.deliveryCharge}*
+• पुराना बकाया (Old Due): *₹${bill.oldDue}*
+━━━━━━━━━━━━━━━━━━━━
+💰 *कुल बिल (Total): ₹${bill.totalPayable}*
+${bill.paidAmount > 0 ? `✅ जमा राशि (Paid): ₹${bill.paidAmount}\n` : ''}👉 *कुल बकाया (Outstanding): ₹${bill.remainingDue}*
+━━━━━━━━━━━━━━━━━━━━
+📲 *UPI ID:* ${settings.upiId}
+🔗 पे लिंक: ${upiLink}
 
-📲 *UPI डायरेक्ट पेमेंट लिंक (PhonePe/GPay/Paytm):*
-• UPI ID: *${settings.upiId}*
-• पे लिंक: ${upiLink}
-
-⚠️ *नियम एवं शर्तें:*
-• भुगतान 5 दिवस के अन्दर करना आवश्यक है।
-• दैनिक पेपर नहीं मिलने की सूचना 24 घंटे के भीतर दुकान पर देना अनिवार्य है।
-
-सादर,
-*${settings.headerName}*
-विज्ञापन एवं समाचार के लिए: *${settings.publicityName}*
-*${settings.medicalStoreName}*`;
+(कृपया समय पर भुगतान कर सहयोग करें। धन्यवाद!)`;
 }
 
 export type ReminderType = 'gentle' | 'due_date' | 'urgent_overdue' | 'short_sms';
